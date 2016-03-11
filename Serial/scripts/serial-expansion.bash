@@ -4,7 +4,7 @@
 echo "Running Expansion sequence, this will take time."
 
 cd ..
-mkdir serial-expansion/
+mkdir -p results/serial-expansion/
 
 for ((i=1; i <= 501; i=i+50)); do
 	echo "Running Serial expansion for max iteration of $i."
@@ -14,10 +14,6 @@ for ((i=1; i <= 501; i=i+50)); do
 	--params inputs/sample/sample.params \
 	--max_reps $i >>  serial-expansion/output.log
 
-	mv result.ppm  serial-expansion/output.$i\.ppm
+	mv result.ppm  results/serial-expansion/output.$i\.ppm
 
 done
-
-rm -rf results/serial-expansion
-
-mv  serial-expansion results/
