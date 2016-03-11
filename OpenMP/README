@@ -1,0 +1,15 @@
+To run simulation test do the following:
+
+In Serial folder:
+	make all
+	cd inputs/sample/
+	make all
+	make run
+	cd ../../scripts/
+	./serial-expansion.bash
+
+To view results:
+	cd ../results/serial-expansion/
+
+	- Open the output images using gnome-open (need X to view them)
+	- Open output.log for execution times
