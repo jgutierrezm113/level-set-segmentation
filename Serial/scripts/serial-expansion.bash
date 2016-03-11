@@ -4,6 +4,7 @@
 echo "Running Expansion sequence, this will take time."
 
 cd ..
+rm -rf results/serial-expansion/
 mkdir -p results/serial-expansion/
 
 for ((i=1; i <= 501; i=i+50)); do
@@ -12,7 +13,7 @@ for ((i=1; i <= 501; i=i+50)); do
 	--image inputs/sample/sample.intensities.pgm \
 	--labels inputs/sample/sample.label.pgm \
 	--params inputs/sample/sample.params \
-	--max_reps $i >>  serial-expansion/output.log
+	--max_reps $i >>  results/serial-expansion/output.log
 
 	mv result.ppm  results/serial-expansion/output.$i\.ppm
 
