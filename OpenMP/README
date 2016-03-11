@@ -6,6 +6,9 @@ In OpenMP folder:
 	make all
 	make run
 	cd ../../scripts/
+	
+	<modify bsub.bash to use your work directories>
+
 	bsub < bsub.bash
 	
 	<wait for job to finish using bjobs>

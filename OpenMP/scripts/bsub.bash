@@ -5,9 +5,9 @@
 #BSUB -e err.log
 #BSUB -n 4 
 #BSUB -q ht-10g 
-#BSUB cwd /home/gutierrez.jul/HPC/project/OpenMP 
+#BSUB cwd /home/gutierrez.jul/HPC/project/level-set-segmentation/OpenMP 
 
-work=/home/gutierrez.jul/HPC/project/OpenMP
+work=/home/gutierrez.jul/HPC/project/level-set-segmenatation/OpenMP
 
 cd $work 
 rm -rf results/discovery-omp
