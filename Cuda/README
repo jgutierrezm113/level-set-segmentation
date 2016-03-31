@@ -1,23 +1,16 @@
-To run simulation test do the following in the discovery cluster:
+Please note inside this folder there are different cuda implementations targetting higher performance. Current versions are:
 
-In Cuda folder:
-	make all
-	cd inputs/sample/
-	make all
-	make run
-	cd ../../scripts/
-	
-	<interactively choose a gpu node>
+Cuda-NonOpt
+-----------
+	No Optimization done.
+	This is the first implementation of the program. It basically covers the algorithm specified in the documentation, without any sort of improvement for performance.
 
-	bsub -Is -XF -q par-gpu -n 1 /bin/bash
-	
-Run script:
-	cd scripts/
-	./Run.bash
+Cuda-OGA
+--------
+	Optimized Global Access.
+	This is an enhancement over the first implementation that improved the access to the synchronization variable in global memory, significantly reducing the execution time, and avoiding race conditions.
 
-To view results:
-	cd ../results/discovery-omp/
-
-	- Open the output images using gnome-open (might need to copy file to personal computer
-	  given discovery doesn't allow image viewing)
-	- Open output.log for execution times
+Cuda-OGA+MC+P+SCM
+-----------------
+	Optimized Global Access + Memory Coalesce improvement + Packeting + Shared Char Memory
+	This is the most optimized version of the code. It has the optimized global memory access mentioned before, improved memory coalescing, packeting of char values into int, and reduced Shared Memory space and improved performance by using chars.
