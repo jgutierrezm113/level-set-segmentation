@@ -29,6 +29,7 @@
 
 // timing directives
 #define CUDA_TIMING
+#define KERNEL_TIMING
 
 // Debug Cuda Errors
 #define DEBUG

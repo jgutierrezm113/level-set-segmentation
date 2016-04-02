@@ -879,9 +879,8 @@ signed int *levelSetSegment(unsigned int *intensity,
 			gpu.size, 
 			cudaMemcpyHostToDevice));
 
-	checkCuda(cudaDeviceSynchronize());
-
-	#if defined(CUDA_TIMING)
+	#if defined(KERNEL_TIMING)
+		checkCuda(cudaDeviceSynchronize());
 		float Ktime;
 		TIMER_CREATE(Ktime);
 		TIMER_START(Ktime);
@@ -906,9 +905,9 @@ signed int *levelSetSegment(unsigned int *intensity,
 					gpu.globalFinishedVariable,
 					gpu.totalIterations);
 	
-	checkCuda(cudaDeviceSynchronize());
 
-	#if defined(CUDA_TIMING)
+	#if defined(KERNEL_TIMING)
+		checkCuda(cudaDeviceSynchronize());
 		TIMER_END(Ktime);
 		printf("Kernel Execution Time: %f ms\n", Ktime);
 	#endif
