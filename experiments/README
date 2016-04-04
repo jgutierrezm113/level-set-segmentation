@@ -1,0 +1,17 @@
+To launch all the experiments please make sure you are using the discovery cluster and connected to the queue par-gpu.
+
+	bsub -Is -XF -q par-gpu -n 1 /bin/bash
+
+Launch experiments using scripts in script folder.
+
+	cd scripts
+
+To run all experiments:
+	
+	make run
+
+To run one of the experiments:
+
+	./<script>.bash
+
+Please note, the warnings printed from the makefile can be ignored. Please make sure to check the all.log file for errors before reviewing the results.
