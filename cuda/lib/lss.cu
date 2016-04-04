@@ -52,9 +52,7 @@ __global__ void lssStep1(unsigned int* intensity,
 	__shared__   signed char       phiTile[TILE_SIZE+2][TILE_SIZE+2]; // output
 	
 	// Flags
-	__shared__ volatile char localGBI;
-	__shared__ volatile char allOnes;
-	__shared__ volatile char change;
+	__shared__ volatile int localGBI;
 		
 	// Read Input Data into Shared Memory
 	/////////////////////////////////////////////////////////////////////////////////////
@@ -258,7 +256,6 @@ __global__ void lssStep1(unsigned int* intensity,
 		}
 	}	
 	localGBI = 0;
-	allOnes = 1;
 	
 	__syncthreads();
 	
@@ -272,46 +269,19 @@ __global__ void lssStep1(unsigned int* intensity,
 			int ownIntData = intensityTile[tempY][tempX];
 			if(ownIntData >= lowerIntensityBound && 
 			   ownIntData <= upperIntensityBound) {
-				localGBI = 1;
 				if (labelTile[tempY][tempX] == targetLabel)
 					phiTile[tempY][tempX] = 1;
 				else {
-					allOnes = 0;
+					localGBI=1;//localGBI++;
 					phiTile[tempY][tempX] = 2;
 				}
 			} else {
 				phiTile[tempY][tempX] = 0;
-				allOnes = 0;
 			}
 		}
 	}
-   
-	// Work
-	change = 1;
-	
 	__syncthreads();
-	
-	while (change){
-		__syncthreads();
-		change = 0;
-		__syncthreads();
-		
-		for (int tempY = ty+1; tempY <= TILE_SIZE; tempY+=BLOCK_TILE_SIZE ){
-			for (int tempX = tx+1; tempX <= TILE_SIZE; tempX+=BLOCK_TILE_SIZE ){
-				
-				if((phiTile[tempY+1][tempX  ]  == 1 ||
-				    phiTile[tempY-1][tempX  ]  == 1 ||
-				    phiTile[tempY  ][tempX-1]  == 1 ||
-				    phiTile[tempY  ][tempX+1]  == 1 ) && 
-				    phiTile[tempY  ][tempX  ]  == 2){
-					phiTile  [tempY][tempX] = 1;
-					change = 1;
-				}
-			}
-		}
-		__syncthreads();
-	}
-	
+
 	// Write back to main memory
 	int phiData1 = phiTile[sharedY  ][sharedX  ] & 0xFF;
         int phiData2 = phiTile[sharedY  ][sharedX+1] & 0xFF;
@@ -326,11 +296,7 @@ __global__ void lssStep1(unsigned int* intensity,
 	phi[location] = phiReturnData;
 	
 	if (tx == 0 && ty == 0){
-		if (allOnes){
-			globalBlockIndicator[blockId]=0;
-		} else {
-			globalBlockIndicator[blockId]=localGBI;
-		}
+		globalBlockIndicator[blockId]=localGBI;
 	}
 }
 
@@ -352,15 +318,19 @@ __global__ void lssStep1(unsigned int* intensity,
 	__shared__ signed char    phiTile[TILE_SIZE+2][TILE_SIZE+2]; // input/output
 
 	// Flags
-	__shared__ volatile char borderChange;
+	__shared__ volatile char BlockChange;
 	__shared__ volatile char change;
+	__shared__ volatile int redoBlock;
 		
 	// Read Global Block Indicator from global memory
 	int localGBI = globalBlockIndicator[blockId];
 	
+	// Set Block Variables
+	redoBlock = 0;
+	
 	__syncthreads();
 	
-	if (localGBI) {
+	if (localGBI > 0) {
 		
 		// Read Input Data into Shared Memory
 		/////////////////////////////////////////////////////////////////////////////////////
@@ -492,8 +462,8 @@ __global__ void lssStep1(unsigned int* intensity,
 			}
 		}
 		
-		borderChange = 0; // Shared variable
-		change = 1; // Shared variable
+		BlockChange = 0; // Shared variable
+		change       = 1; // Shared variable
 		__syncthreads();
 		
 		// Algorithm 
@@ -514,34 +484,42 @@ __global__ void lssStep1(unsigned int* intensity,
 					    phiTile[tempY  ][tempX  ]  == 2){
 						phiTile  [tempY][tempX] = 1;
 						change = 1;
-						if (tempX == 1 || tempX == BLOCK_TILE_SIZE || 
-						    tempY == 1 || tempY == BLOCK_TILE_SIZE ){
-							borderChange = 1;
-						}
+						BlockChange = 1;
 					}
 				}
 			}
 			__syncthreads();
 		}
 		
-		if (borderChange){
-			int phiData1 = phiTile[sharedY  ][sharedX  ] & 0xFF;
-			int phiData2 = phiTile[sharedY  ][sharedX+1] & 0xFF;
-			int phiData3 = phiTile[sharedY+1][sharedX  ] & 0xFF;
-			int phiData4 = phiTile[sharedY+1][sharedX+1] & 0xFF;
+		// To check if there are pixels with phi value of 2
+		for (int tempY = ty+1; tempY <= TILE_SIZE; tempY+=BLOCK_TILE_SIZE ){
+			for (int tempX = tx+1; tempX <= TILE_SIZE; tempX+=BLOCK_TILE_SIZE ){
+				if (phiTile[tempY][tempX] == 2){
+					redoBlock = 1;
+				}
+			}
+		}
+		
+		__syncthreads();
+		
+		int phiData1 = phiTile[sharedY  ][sharedX  ] & 0xFF;
+		int phiData2 = phiTile[sharedY  ][sharedX+1] & 0xFF;
+		int phiData3 = phiTile[sharedY+1][sharedX  ] & 0xFF;
+		int phiData4 = phiTile[sharedY+1][sharedX+1] & 0xFF;
 
-			int phiReturnData = phiData1        |
-					   (phiData2 << 8 ) |
-					   (phiData3 << 16) |
-					   (phiData4 << 24);
-					
-			phi[location] = phiReturnData;
-
-			if (tx == 0 && ty == 0){
+		int phiReturnData = phiData1        |
+				   (phiData2 << 8 ) |
+				   (phiData3 << 16) |
+				   (phiData4 << 24);
+				
+		phi[location] = phiReturnData;
+			
+		if (tx == 0 && ty == 0) {
+			if (BlockChange){
 				*globalFinishedVariable = 1;
-				globalBlockIndicator[blockId]=0;
 				__threadfence();
 			}
+			globalBlockIndicator[blockId] = redoBlock;
 		}
 	}
 }
@@ -764,7 +742,8 @@ __global__ void evolveContour(unsigned int* intensity,
 
 	// Global synchronization variable
 	globalFinishedVariable = &globalFinishedVariable[tid];
-	
+	*globalFinishedVariable = 0;
+
 	dim3 dimGrid(gridXSize, gridYSize);
         dim3 dimBlock(BLOCK_TILE_SIZE, BLOCK_TILE_SIZE);
 	
@@ -777,6 +756,7 @@ __global__ void evolveContour(unsigned int* intensity,
 					upperIntensityBounds[tid],
 					globalBlockIndicator,
 					globalFinishedVariable );
+	
 	int iterations = 0;
 	do {
 		iterations++;

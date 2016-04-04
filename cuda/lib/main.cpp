@@ -179,7 +179,9 @@ int main(int argc, char* argv[]) {
 		
 		char filename[64];
 		sprintf(filename, "result.ppm");
-		
+	
+		srand(1000);
+	
 		#if defined(VERBOSE)
 			cout << "Produccing final image file " << filename << "." << endl;
 		#endif

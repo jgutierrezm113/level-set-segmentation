@@ -32,7 +32,7 @@
 #define KERNEL_TIMING
 
 // Debug Cuda Errors
-#define DEBUG
+//#define DEBUG
 
 // Output Brightness for inside object
 #define OUTPUT_BRIGHTNESS 50
@@ -52,7 +52,7 @@
  */
 /*#if BLOCK_TILE_SIZE >= 64
 	#undef BLOCK_TILE_SIZE
-	#define BLOCK_TILE_SIZE 64
+	#define BLOCK_TILE_SIZE 32
 	#define BTSMask		31
 	#define BTSB		5
 	
