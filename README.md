@@ -11,6 +11,6 @@ The proposed project is a follow up for an ongoing research project by students 
 
 The overall objective was met, which was to create an application that is efficient in execution so that it can be added as part of the NUPAR benchmark suite and help target performance on modern architectures. This was done by the implementation of a new algorithmic approach to the problem, and by implementing the code in Cuda using dynamic parallelism (nested), the performance was significantly improved. 
 
-Note: to run full experiments please go to the experiments folder.
+Note: to run full experiments please go to the experiments folder and follow the steps there.
 
 
