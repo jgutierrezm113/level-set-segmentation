@@ -10,7 +10,7 @@ make all
 cd ..
 
 #compile openMP code
-cd openMP/
+cd omp/
 make clean
 make all
 cd ..
@@ -36,11 +36,11 @@ for i in 0001 0600 1200 1800 2400
 do 
 	export OMP_NUM_THREADS=1
 	echo "NOTE: Using 1 thread (sequential)" > results/$name/seq/$i.log
-	openMP/lss --image $image --labels $labels --params $params --max_reps $i >> results/$name/seq/$i.log 
+	omp/lss --image $image --labels $labels --params $params --max_reps $i >> results/$name/seq/$i.log 
 	mv result.ppm results/$name/seq/$i.ppm 
 	export OMP_NUM_THREADS=32
 	echo "NOTE: Using 32 threads (max allowed)" > results/$name/omp/$i.log
-	openMP/lss --image $image --labels $labels --params $params --max_reps $i >> results/$name/omp/$i.log
+	omp/lss --image $image --labels $labels --params $params --max_reps $i >> results/$name/omp/$i.log
 	mv result.ppm results/$name/omp/$i.ppm
 done
 

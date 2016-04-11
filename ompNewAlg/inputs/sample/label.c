@@ -33,16 +33,12 @@ static void image_fill (Image *image, unsigned char  value) {
  * image_set_pixel:
  *
  * Sets a pixel passed in signed (x, y) coordinates, where (0,0) is at
- * (x0,y0).
+ * the beginning of the image.
  **/
-static void image_set_pixel (Image *image, int x0, int y0, ssize_t x, ssize_t y, unsigned char  value) {
-
-	ssize_t tx = x0 + x;
-	ssize_t ty = y0 + y;
-	
+static void image_set_pixel (Image *image, ssize_t x, ssize_t y, unsigned char  value) {
 	unsigned char *p;
 
-	p = image->data + (ty * image->width) + tx;
+	p = image->data + (y * image->width) + x;
 	*p = value;
 }
 
@@ -62,13 +58,11 @@ static void image_save (const Image *image, const char  *filename) {
 	fclose (out);
 }
 
-static void draw_circle (Image *image, int x0, int y0, int radius, unsigned char  value) {
+static void draw_label (Image *image, int x0, int y0, int x1, int y1, unsigned char  value) {
 	int x, y;
-
-	for (y = -radius; y <= radius; y++)
-		for (x = -radius; x <= radius; x++)
-			if ((x * x) + (y * y) <= (radius * radius))
-				image_set_pixel (image, x0, y0, x, y, value);
+	for (y = y0; y < y1; y++)
+		for (x = x0; x < x1; x++)
+			image_set_pixel (image, x, y, value);
 }
 
 int main (int argc, char *argv[]) {
@@ -77,13 +71,13 @@ int main (int argc, char *argv[]) {
 	image = image_new (2048, 2048);
 	image_fill (image, 0);
 
-	draw_circle (image,  256,  256, 256,  50); // Draw Label 1
-	draw_circle (image,  256, 1792, 256,  50); // Draw Label 2
-	draw_circle (image, 1792,  256, 256,  50); // Draw Label 3
-	draw_circle (image, 1792, 1792, 256,  50); // Draw Label 4
-	draw_circle (image, 1024, 1024, 512, 100); // Draw Label 5
+	draw_label (image,    1,    1,  768,  768,  50); // Draw Label 1
+	draw_label (image,    1, 1280,  768, 2046, 100); // Draw Label 2
+	draw_label (image, 1280,    1, 2046,  768, 150); // Draw Label 3
+	draw_label (image, 1280, 1280, 2046, 2046, 200); // Draw Label 4
+	draw_label (image,  768,  768, 1280, 1280, 250); // Draw Label 5
 
-	image_save (image, "sample.intensities.pgm");
+	image_save (image, "sample.label.pgm");
 	image_free (image);
 
 	return 0;

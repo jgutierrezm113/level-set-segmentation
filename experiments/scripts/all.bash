@@ -10,6 +10,10 @@ echo "Running evolutioncurve test"
 echo "***************************" 
 ./evolutioncurve.bash 
 
+echo "Running evolutioncurve test with new alg" 
+echo "****************************************" 
+./evolutioncurveNewAlg.bash 
+
 echo "Running fractal test" 
 echo "********************" 
 ./fractal.bash 
